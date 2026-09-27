@@ -88,6 +88,7 @@
     font-size: 14px;
     transition: all 0.3s ease;
     background: #fff;
+    font-family: 'Inter', sans-serif;
   }
   input:focus, select:focus, textarea:focus {
     outline: none;
@@ -108,6 +109,7 @@
     justify-content: center;
     gap: 8px;
     font-size: 14px;
+    text-decoration: none;
   }
   .btn.primary { background: var(--primary); color: #fff; box-shadow: 0 4px 6px rgba(66,153,225,0.2); }
   .btn.primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
@@ -120,7 +122,7 @@
   .btn.small { padding: 6px 12px; font-size: 12px; }
   .btn.block { width: 100%; margin-top: 8px; }
 
-  .msg { font-size: 12px; color: var(--danger); margin-top: 15px; min-height: 15px; }
+  .msg { font-size: 12px; color: var(--danger); margin-top: 15px; min-height: 15px; text-align: center; }
   small { display: block; margin-top: 20px; color: #a0aec0; font-size: 11px; }
 
   /* APP LAYOUT */
@@ -382,7 +384,7 @@
     <button id="loginBtn" class="btn primary block">Masuk</button>
     <button id="registerBtn" class="btn ghost block">Daftar Akun Baru</button>
     <div id="authMsg" class="msg"></div>
-    <small>Isi konfigurasi Supabase di <b>app.js</b> sebelum digunakan.</small>
+    <small>Isi konfigurasi Supabase di bagian script sebelum digunakan.</small>
   </div>
 </div>
 
@@ -587,9 +589,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // --- KONFIGURASI SUPABASE ---
-  // Ganti dengan URL dan Key Supabase Anda
-  const SUPABASE_URL = "https://txcmtbavrxnwtueqfbvo.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y210YmF2cnhud3R1ZXFmYnZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0OTc1NjksImV4cCI6MjEwNjA3MzU2OX0.xdWbr33kzKTgfcAnxJL5v_pdB5aQODmrLdBYSXnQZkI";
+  // GANTI DENGAN URL DAN KEY MILIK ANDA
+  const SUPABASE_URL = "https://txcmtbavrxnwtueqfbvo.supabase.co"; 
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y210YmF2cnhud3R1ZXFmYnZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0OTc1NjksImV4cCI6MjEwNjA3MzU2OX0.xdWbr33kzKTgfcAnxJL5v_pdB5aQODmrLdBYSXnQZkI"; 
+  
   let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // --- DUMMY DATA FALLBACK ---
@@ -597,18 +600,28 @@
   let isDemoMode = SUPABASE_URL.includes("your-project");
   let db = {
     products: [
-      {id: 1, name: "Jersey Voli Premium", price: "85000", min: "10 pcs", img: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?w=500", desc: "Bahan dryfit, custom nama & nomor."}
+      {id: 1, name: "Jersey Voli Premium", price: "85000", min_order: "10 pcs", image_url: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?w=500", description: "Bahan dryfit, custom nama & nomor."}
     ],
     ads: [
       {id: 1, title: "Promo Akhir Tahun", platform: "Instagram", caption: "🔥 Dapatkan jersey impian tim Anda! 🔥 Discount 10% untuk pemesanan minimal 20 pcs. Buruan pesan sebelum kehabisan! 🏃‍♂️💨 . #EcoSport #JerseyCustom"}
     ],
     schedules: [
-      {id: 1, title: "Posting Produk Baru", platform: "Facebook", date: "2024-01-20T10:00", status: "Terjadwal"}
+      {id: 1, title: "Posting Produk Baru", platform: "Facebook", schedule_date: "2024-01-20T10:00", status: "Terjadwal"}
     ],
     customers: [
       {id: 1, name: "Budi Santoso", phone: "08123456789", product: "Jersey Futsal", status: "Prospek", note: "Menunggu desain"}
     ],
     settings: { wa: "6285768068165", name: "ECO SPORT", area: "OKU Timur" }
+  };
+
+  // Cek sesi yang sedang aktif saat halaman dimuat
+  window.onload = async function() {
+    if(!isDemoMode) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        enterApp(session.user.email);
+      }
+    }
   };
 
   // --- UI CONTROLLERS ---
@@ -629,23 +642,61 @@
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // --- AUTH ---
+  // --- AUTHENTICATION ---
   async function login() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
+    const msgEl = document.getElementById('authMsg');
+    msgEl.innerText = "";
     
     if(isDemoMode) {
-      document.getElementById('authMsg').innerText = "Mode Demo: Klik Masuk tanpa perlu kredensial.";
-      enterApp("demo@ecosport.com");
+      msgEl.style.color = "var(--warning)";
+      msgEl.innerText = "Mode Demo: Mengisi Supabase URL/Key belum diatur. Masuk simulasi...";
+      setTimeout(() => enterApp("demo@ecosport.com"), 1000);
       return;
     }
 
-    // Kode Supabase asli
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
     if (error) {
-      document.getElementById('authMsg').innerText = error.message;
+      msgEl.style.color = "var(--danger)";
+      msgEl.innerText = error.message;
     } else {
       enterApp(data.user.email);
+    }
+  }
+
+  async function register() {
+    const email = document.getElementById('email').value;
+    const pass = document.getElementById('password').value;
+    const msgEl = document.getElementById('authMsg');
+    msgEl.innerText = "";
+
+    if(isDemoMode) {
+      msgEl.style.color = "var(--danger)";
+      msgEl.innerText = "Mode Demo: Fitur daftar tidak aktif. Isi kredensial Supabase asli di kode.";
+      return;
+    }
+
+    if(!email || !pass) {
+      msgEl.style.color = "var(--danger)";
+      msgEl.innerText = "Email dan password harus diisi.";
+      return;
+    }
+
+    if(pass.length < 6) {
+      msgEl.style.color = "var(--danger)";
+      msgEl.innerText = "Password minimal harus 6 karakter.";
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({ email, password: pass });
+    
+    if (error) {
+      msgEl.style.color = "var(--danger)";
+      msgEl.innerText = error.message;
+    } else {
+      msgEl.style.color = "var(--success)";
+      msgEl.innerText = "Pendaftaran berhasil! Cek email Anda untuk verifikasi (jika diaktifkan), lalu silakan Login.";
     }
   }
 
@@ -664,10 +715,14 @@
     loadSettings();
   }
 
-  function logout() {
-    if(!isDemoMode) supabase.auth.signOut();
+  async function logout() {
+    if(!isDemoMode) {
+      await supabase.auth.signOut();
+    }
     document.getElementById('app').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
   }
 
   // --- LOADERS & RENDERERS ---
@@ -683,17 +738,17 @@
     const list = document.getElementById('productsList');
     list.innerHTML = db.products.map(p => `
       <div class="product-card">
-        <img src="${p.img || 'https://via.placeholder.com/300x200'}" class="card-img" alt="${p.name}">
+        <img src="${p.image_url || 'https://via.placeholder.com/300x200'}" class="card-img" alt="${p.name}">
         <div class="card-body">
           <h3>${p.name}</h3>
-          <p>${p.desc || ''}</p>
+          <p>${p.description || ''}</p>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
             <span class="badge bg-blue">Rp ${p.price || '-'}</span>
             <button class="btn danger small" onclick="deleteItem('products', ${p.id})"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
-    `).join('');
+    `).join('') || '<p style="color:var(--text-muted);">Belum ada produk.</p>';
   }
 
   function loadAds() {
@@ -715,7 +770,7 @@
       <div class="list-item">
         <div>
           <h4 style="margin-bottom:4px;">${s.title}</h4>
-          <small style="color:var(--text-muted);">${s.platform} • ${s.date} • Status: ${s.status}</small>
+          <small style="color:var(--text-muted);">${s.platform} • ${s.schedule_date} • Status: ${s.status}</small>
         </div>
         <button class="btn danger small" onclick="deleteItem('schedules', ${s.id})"><i class="fas fa-trash"></i></button>
       </div>
@@ -748,7 +803,7 @@
   function addProduct() {
     db.products.push({
       id: Date.now(),
-      name: pName.value, price: pPrice.value, min: pMin.value, img: pImage.value, desc: pDesc.value
+      name: pName.value, price: pPrice.value, min_order: pMin.value, image_url: pImage.value, description: pDesc.value
     });
     closeModal('productModal');
     loadProducts(); loadDashboard();
@@ -766,7 +821,7 @@
   function addSchedule() {
     db.schedules.push({
       id: Date.now(),
-      title: sTitle.value, platform: sPlatform.value, date: sDate.value, status: sStatus.value
+      title: sTitle.value, platform: sPlatform.value, schedule_date: sDate.value, status: sStatus.value
     });
     closeModal('scheduleModal');
     loadSchedules(); loadDashboard();
@@ -809,8 +864,8 @@
     const s = document.getElementById('gStyle').value;
 
     let stylePrefix = "";
-    if(s.includes("Agresif")) stylePrefix = "�️ PROMO SPESIAL HARI INI! 🚀\n";
-    if(s.includes("Santai")) stylePrefix = "Halosobat ECO SPORT! 👋\n";
+    if(s.includes("Agresif")) stylePrefix = "🚀 PROMO SPESIAL HARI INI! 🚀\n";
+    if(s.includes("Santai")) stylePrefix = "Halo sobat ECO SPORT! 👋\n";
     if(s.includes("WhatsApp")) stylePrefix = "";
 
     const text = `${stylePrefix}Ada ${p} nih buat ${t}! 🏆🔥\n\nKenapa harus pilih kita?\n✅ ${b}\n✅ Harga bersahabat\n✅ Pengerjaan cepat & rapi\n\n💰 ${pr}\n\nJangan sampe kehabisan! Langsung chat admin sekarang untuk pemesanan & custom desain. 📲\n\n#EcoSport #JerseyCustom #KonveksiBerkualitas`;
@@ -833,8 +888,9 @@
     alert("Materi iklan disimpan!");
   }
 
-  // --- INIT ---
+  // --- EVENT LISTENERS ---
   document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('registerBtn').addEventListener('click', register);
   document.getElementById('logoutBtn').addEventListener('click', logout);
 </script>
 </body>
