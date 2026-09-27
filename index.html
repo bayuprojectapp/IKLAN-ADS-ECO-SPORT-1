@@ -654,7 +654,6 @@
     }
 
     if(isDemoMode) {
-      // Simulasi login demo
       msgEl.style.color = "var(--success)";
       msgEl.innerText = "Mode Demo aktif... Masuk aplikasi.";
       setTimeout(() => enterApp(email), 1000);
@@ -673,6 +672,7 @@
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
     const msgEl = document.getElementById('authMsg');
+    
     msgEl.innerText = "";
     msgEl.style.color = "var(--danger)";
 
@@ -687,20 +687,33 @@
     }
 
     if(isDemoMode) {
-      // Simulasi register demo
       msgEl.style.color = "var(--success)";
-      msgEl.innerText = "Mode Demo: Akun dibuat simulasi. Silakan klik Masuk.";
+      msgEl.innerText = "Mode Demo: Akun dibuat simulasi. Mengalihkan ke aplikasi...";
+      setTimeout(() => enterApp(email), 1500);
       return;
     }
 
     // Eksekusi Daftar Akun ke Supabase
-    const { data, error } = await supabase.auth.signUp({ email, password: pass });
+    const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password: pass 
+    });
     
     if (error) {
-      msgEl.innerText = error.message;
+      // Jika gagal daftar (misal: email sudah terdaftar)
+      msgEl.innerText = "Gagal Daftar: " + error.message;
     } else {
+      // Jika berhasil daftar
       msgEl.style.color = "var(--success)";
-      msgEl.innerText = "Pendaftaran berhasil! Cek email Anda untuk verifikasi (jika diaktifkan di Supabase), lalu silakan Login.";
+      
+      if (data.user && data.session) {
+        // Jika Supabase langsung mengembalikan sesi (tanpa perlu verifikasi email)
+        msgEl.innerText = "Pendaftaran berhasil! Mengalihkan...";
+        enterApp(data.user.email);
+      } else {
+        // Jika Supabase meminta verifikasi email
+        msgEl.innerText = "Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi, lalu login.";
+      }
     }
   }
 
