@@ -100,8 +100,8 @@
     <p>Masuk atau daftar untuk mengelola iklan dan katalog jersey Anda.</p>
     <div class="form-group"><input id="email" type="email" placeholder="Masukkan Email"></div>
     <div class="form-group"><input id="password" type="password" placeholder="Masukkan Password (min 6 karakter)"></div>
-    <button onclick="handleLogin()" class="btn primary block">Masuk</button>
-    <button onclick="handleRegister()" class="btn ghost block">Daftar Akun Baru</button>
+    <button id="btnLogin" class="btn primary block">Masuk</button>
+    <button id="btnRegister" class="btn ghost block">Daftar Akun Baru</button>
     <div id="authMsg" class="msg"></div>
     <small>Pastikan URL Website di Supabase sudah diatur dengan benar.</small>
   </div>
@@ -124,12 +124,12 @@
       <div class="user-info">
         <div class="avatar" id="avatarText">A</div>
         <span id="userEmail">admin@ecosport.com</span>
-        <button onclick="handleLogout()" class="btn danger small">Keluar</button>
+        <button id="btnLogout" class="btn danger small">Keluar</button>
       </div>
     </header>
     <main class="content">
       <section id="dashboard" class="page active-page">
-        <div class="page-head"><div><h1>Dashboard</h1><p>Pusat kontrol pemasaran ECO SPORT.</p></div><button class="btn primary" onclick="showPage('generator')"><i class="fas fa-plus"></i> Buat Iklan</button></div>
+        <div class="page-head"><div><h1>Dashboard</h1><p>Pusat kontrol pemasaran ECO SPORT.</p></div><button class="btn primary" data-action="page" data-page="generator"><i class="fas fa-plus"></i> Buat Iklan</button></div>
         <div class="stats">
           <div class="stat-card"><div class="stat-icon bg-blue"><i class="fas fa-tshirt"></i></div><div class="stat-info"><b id="statProducts">0</b><span>Total Produk</span></div></div>
           <div class="stat-card"><div class="stat-icon bg-green"><i class="fas fa-bullhorn"></i></div><div class="stat-info"><b id="statAds">0</b><span>Materi Iklan</span></div></div>
@@ -137,30 +137,29 @@
           <div class="stat-card"><div class="stat-icon bg-purple"><i class="fas fa-users"></i></div><div class="stat-info"><b id="statCustomers">0</b><span>Pelanggan</span></div></div>
         </div>
         <div class="grid2">
-          <div class="panel"><h2>🚀 Fokus Penjualan</h2><p>Gunakan generator iklan untuk membuat caption yang siap diposting ke Facebook, Instagram, TikTok, dan WhatsApp.</p><button class="btn primary" onclick="showPage('generator')">Buat Caption Sekarang</button></div>
+          <div class="panel"><h2>🚀 Fokus Penjualan</h2><p>Gunakan generator iklan untuk membuat caption yang siap diposting ke Facebook, Instagram, TikTok, dan WhatsApp.</p><button class="btn primary" data-action="page" data-page="generator">Buat Caption Sekarang</button></div>
           <div class="panel"><h2>📲 Pesanan WhatsApp</h2><p>Arahkan calon pembeli langsung ke WhatsApp Admin ECO SPORT untuk respons cepat.</p><a id="waDash" class="btn success" target="_blank"><i class="fab fa-whatsapp"></i> Buka WhatsApp</a></div>
         </div>
       </section>
-      <section id="products" class="page"><div class="page-head"><div><h1>Katalog Jersey</h1><p>Kelola produk yang ingin dipromosikan.</p></div><button class="btn primary" onclick="openModal('productModal')"><i class="fas fa-plus"></i> Tambah Produk</button></div><div id="productsList" class="cards"></div></section>
-      <section id="ads" class="page"><div class="page-head"><div><h1>Materi Iklan</h1><p>Simpan caption dan materi promosi.</p></div><button class="btn primary" onclick="openModal('adModal')"><i class="fas fa-plus"></i> Materi Iklan</button></div><div id="adsList" class="list"></div></section>
-      <section id="generator" class="page"><div class="page-head"><div><h1>Generator Iklan</h1><p>Buat caption promosi siap copy berbasis AI.</p></div></div><div class="panel"><div class="grid2" style="grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="form-group"><label>Jenis produk</label><input id="gProduct" placeholder="Contoh: Jersey Futsal Custom"></div><div class="form-group"><label>Target pelanggan</label><input id="gTarget" placeholder="Contoh: Tim futsal, sekolah"></div><div class="form-group"><label>Keunggulan</label><input id="gBenefit" placeholder="Contoh: bahan nyaman, desain custom"></div></div><div><div class="form-group"><label>Promo / harga</label><input id="gPromo" placeholder="Contoh: Harga mulai Rp89.000"></div><div class="form-group"><label>Gaya iklan</label><select id="gStyle"><option>Menarik & profesional</option><option>Agresif untuk jualan</option><option>Santai & kekinian</option><option>Singkat untuk WhatsApp Status</option></select></div><button class="btn primary block" onclick="generateAd()"><i class="fas fa-magic"></i> Generate Iklan</button></div></div><hr style="border:0; border-top:1px solid var(--border-color); margin: 24px 0;"><textarea id="generated" rows="10" placeholder="Hasil iklan akan muncul di sini..." style="background:#f7fafc; border-radius:8px;"></textarea><div style="margin-top:16px; display:flex; gap:12px;"><button class="btn ghost" onclick="copyGenerated()"><i class="fas fa-copy"></i> Copy Text</button><button class="btn success" onclick="saveGenerated()"><i class="fas fa-save"></i> Simpan ke Materi</button></div></div></section>
-      <section id="schedule" class="page"><div class="page-head"><div><h1>Jadwal Iklan</h1><p>Catat jadwal posting dan statusnya.</p></div><button class="btn primary" onclick="openModal('scheduleModal')"><i class="fas fa-plus"></i> Jadwal</button></div><div id="scheduleList" class="list"></div></section>
-      <section id="customers" class="page"><div class="page-head"><div><h1>Pelanggan</h1><p>Kelola calon pelanggan dan pesanan.</p></div><button class="btn primary" onclick="openModal('customerModal')"><i class="fas fa-plus"></i> Pelanggan</button></div><div id="customersList" class="list"></div></section>
-      <section id="settings" class="page"><div class="page-head"><div><h1>Pengaturan</h1><p>Informasi kontak penjualan.</p></div></div><div class="panel" style="max-width: 600px;"><div class="form-group"><label>Nomor WhatsApp (format internasional)</label><input id="waNumber" placeholder="628xxxxxxxxxx"></div><div class="form-group"><label>Nama usaha</label><input id="businessName" value="ECO SPORT"></div><div class="form-group"><label>Alamat / area layanan</label><input id="businessArea" placeholder="Contoh: OKU Timur"></div><button class="btn primary" onclick="saveSettings()"><i class="fas fa-save"></i> Simpan Pengaturan</button><div id="settingsMsg" class="msg" style="color: var(--success);"></div></div></section>
+      <section id="products" class="page"><div class="page-head"><div><h1>Katalog Jersey</h1><p>Kelola produk yang ingin dipromosikan.</p></div><button class="btn primary" data-action="modal" data-modal="productModal"><i class="fas fa-plus"></i> Tambah Produk</button></div><div id="productsList" class="cards"></div></section>
+      <section id="ads" class="page"><div class="page-head"><div><h1>Materi Iklan</h1><p>Simpan caption dan materi promosi.</p></div><button class="btn primary" data-action="modal" data-modal="adModal"><i class="fas fa-plus"></i> Materi Iklan</button></div><div id="adsList" class="list"></div></section>
+      <section id="generator" class="page"><div class="page-head"><div><h1>Generator Iklan</h1><p>Buat caption promosi siap copy berbasis AI.</p></div></div><div class="panel"><div class="grid2" style="grid-template-columns: 1fr 1fr; gap: 24px;"><div><div class="form-group"><label>Jenis produk</label><input id="gProduct" placeholder="Contoh: Jersey Futsal Custom"></div><div class="form-group"><label>Target pelanggan</label><input id="gTarget" placeholder="Contoh: Tim futsal, sekolah"></div><div class="form-group"><label>Keunggulan</label><input id="gBenefit" placeholder="Contoh: bahan nyaman, desain custom"></div></div><div><div class="form-group"><label>Promo / harga</label><input id="gPromo" placeholder="Contoh: Harga mulai Rp89.000"></div><div class="form-group"><label>Gaya iklan</label><select id="gStyle"><option>Menarik & profesional</option><option>Agresif untuk jualan</option><option>Santai & kekinian</option><option>Singkat untuk WhatsApp Status</option></select></div><button class="btn primary block" id="btnGenerate"><i class="fas fa-magic"></i> Generate Iklan</button></div></div><hr style="border:0; border-top:1px solid var(--border-color); margin: 24px 0;"><textarea id="generated" rows="10" placeholder="Hasil iklan akan muncul di sini..." style="background:#f7fafc; border-radius:8px;"></textarea><div style="margin-top:16px; display:flex; gap:12px;"><button class="btn ghost" id="btnCopy"><i class="fas fa-copy"></i> Copy Text</button><button class="btn success" id="btnSaveGenerated"><i class="fas fa-save"></i> Simpan ke Materi</button></div></div></section>
+      <section id="schedule" class="page"><div class="page-head"><div><h1>Jadwal Iklan</h1><p>Catat jadwal posting dan statusnya.</p></div><button class="btn primary" data-action="modal" data-modal="scheduleModal"><i class="fas fa-plus"></i> Jadwal</button></div><div id="scheduleList" class="list"></div></section>
+      <section id="customers" class="page"><div class="page-head"><div><h1>Pelanggan</h1><p>Kelola calon pelanggan dan pesanan.</p></div><button class="btn primary" data-action="modal" data-modal="customerModal"><i class="fas fa-plus"></i> Pelanggan</button></div><div id="customersList" class="list"></div></section>
+      <section id="settings" class="page"><div class="page-head"><div><h1>Pengaturan</h1><p>Informasi kontak penjualan.</p></div></div><div class="panel" style="max-width: 600px;"><div class="form-group"><label>Nomor WhatsApp (format internasional)</label><input id="waNumber" placeholder="628xxxxxxxxxx"></div><div class="form-group"><label>Nama usaha</label><input id="businessName" value="ECO SPORT"></div><div class="form-group"><label>Alamat / area layanan</label><input id="businessArea" placeholder="Contoh: OKU Timur"></div><button class="btn primary" id="btnSaveSettings"><i class="fas fa-save"></i> Simpan Pengaturan</button><div id="settingsMsg" class="msg" style="color: var(--success);"></div></div></section>
     </main>
   </div>
 </div>
 
-<div id="productModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModal('productModal')">×</button><h2>Tambah Produk</h2><div class="form-group"><input id="pName" placeholder="Nama produk"></div><div class="form-group"><input id="pPrice" placeholder="Harga"></div><div class="form-group"><input id="pMin" placeholder="Minimal order"></div><div class="form-group"><input id="pImage" placeholder="URL foto jersey"></div><div class="form-group"><textarea id="pDesc" placeholder="Deskripsi"></textarea></div><button class="btn primary block" onclick="addProduct()">Simpan Produk</button></div></div>
-<div id="adModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModal('adModal')">×</button><h2>Materi Iklan</h2><div class="form-group"><input id="aTitle" placeholder="Judul iklan"></div><div class="form-group"><select id="aPlatform"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>WhatsApp</option></select></div><div class="form-group"><textarea id="aCaption" placeholder="Caption"></textarea></div><button class="btn primary block" onclick="addAd()">Simpan</button></div></div>
-<div id="scheduleModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModal('scheduleModal')">×</button><h2>Jadwal Iklan</h2><div class="form-group"><input id="sTitle" placeholder="Nama kampanye"></div><div class="form-group"><select id="sPlatform"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>WhatsApp</option></select></div><div class="form-group"><input id="sDate" type="datetime-local"></div><div class="form-group"><select id="sStatus"><option>Terjadwal</option><option>Selesai</option><option>Draft</option></select></div><button class="btn primary block" onclick="addSchedule()">Simpan</button></div></div>
-<div id="customerModal" class="modal"><div class="modal-card"><button class="close" onclick="closeModal('customerModal')">×</button><h2>Tambah Pelanggan</h2><div class="form-group"><input id="cName" placeholder="Nama"></div><div class="form-group"><input id="cPhone" placeholder="Nomor WhatsApp"></div><div class="form-group"><input id="cProduct" placeholder="Produk diminati"></div><div class="form-group"><select id="cStatus"><option>Prospek</option><option>Sudah Pesan</option><option>Selesai</option></select></div><div class="form-group"><textarea id="cNote" placeholder="Catatan"></textarea></div><button class="btn primary block" onclick="addCustomer()">Simpan</button></div></div>
+<div id="productModal" class="modal"><div class="modal-card"><button class="close" data-modal="productModal">×</button><h2>Tambah Produk</h2><div class="form-group"><input id="pName" placeholder="Nama produk"></div><div class="form-group"><input id="pPrice" placeholder="Harga"></div><div class="form-group"><input id="pMin" placeholder="Minimal order"></div><div class="form-group"><input id="pImage" placeholder="URL foto jersey"></div><div class="form-group"><textarea id="pDesc" placeholder="Deskripsi"></textarea></div><button class="btn primary block" id="btnAddProduct">Simpan Produk</button></div></div>
+<div id="adModal" class="modal"><div class="modal-card"><button class="close" data-modal="adModal">×</button><h2>Materi Iklan</h2><div class="form-group"><input id="aTitle" placeholder="Judul iklan"></div><div class="form-group"><select id="aPlatform"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>WhatsApp</option></select></div><div class="form-group"><textarea id="aCaption" placeholder="Caption"></textarea></div><button class="btn primary block" id="btnAddAd">Simpan</button></div></div>
+<div id="scheduleModal" class="modal"><div class="modal-card"><button class="close" data-modal="scheduleModal">×</button><h2>Jadwal Iklan</h2><div class="form-group"><input id="sTitle" placeholder="Nama kampanye"></div><div class="form-group"><select id="sPlatform"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>WhatsApp</option></select></div><div class="form-group"><input id="sDate" type="datetime-local"></div><div class="form-group"><select id="sStatus"><option>Terjadwal</option><option>Selesai</option><option>Draft</option></select></div><button class="btn primary block" id="btnAddSchedule">Simpan</button></div></div>
+<div id="customerModal" class="modal"><div class="modal-card"><button class="close" data-modal="customerModal">×</button><h2>Tambah Pelanggan</h2><div class="form-group"><input id="cName" placeholder="Nama"></div><div class="form-group"><input id="cPhone" placeholder="Nomor WhatsApp"></div><div class="form-group"><input id="cProduct" placeholder="Produk diminati"></div><div class="form-group"><select id="cStatus"><option>Prospek</option><option>Sudah Pesan</option><option>Selesai</option></select></div><div class="form-group"><textarea id="cNote" placeholder="Catatan"></textarea></div><button class="btn primary block" id="btnAddCustomer">Simpan</button></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ==========================================
   // KONFIGURASI SUPABASE (Wajib Diisi!)
-  // Ganti dengan URL dan Key Anda
   // ==========================================
   const SUPABASE_URL = "https://txcmtbavrxnwtueqfbvo.supabase.co"; 
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y210YmF2cnhud3R1ZXFmYnZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0OTc1NjksImV4cCI6MjEwNjA3MzU2OX0.xdWbr33kzKTgfcAnxJL5v_pdB5aQODmrLdBYSXnQZkI"; 
@@ -178,26 +177,42 @@
 
   let db = { products: [], ads: [], schedules: [], customers: [], settings: { wa: "6285768068165", name: "ECO SPORT", area: "OKU Timur" } };
 
-  window.onload = async function() {
-    if(!isDemoMode && supabase) {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) enterApp(session.user.email);
-    }
-  };
-
+  // --- DASAR UI ---
+  function $(id) { return document.getElementById(id); }
+  
   function showPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
     document.getElementById(pageId).classList.add('active-page');
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelector(`.nav-item[data-page="${pageId}"]`).classList.add('active');
   }
-  document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
-  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // --- AUTHENTICATION HANDLERS ---
-  // Menggunakan window. agar pasti terbaca oleh HTML
-  window.handleLogin = async function() {
+  function openModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+  function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+  // --- CEK SESI AWAL ---
+  window.onload = async function() {
+    if(!isDemoMode && supabase) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) enterApp(session.user.email);
+      } catch(e) { console.error(e); }
+    }
+    bindEvents(); // Pasang semua event tombol
+    loadDashboard();
+  };
+
+  // --- FUNGSI MASUK APP ---
+  function enterApp(email) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('userEmail').innerText = email;
+    document.getElementById('avatarText').innerText = email.charAt(0).toUpperCase();
+    loadDashboard();
+  }
+
+  // --- FUNGSI AUTH ---
+  async function handleLogin() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
     const msgEl = document.getElementById('authMsg');
@@ -224,7 +239,7 @@
     }
   }
 
-  window.handleRegister = async function() {
+  async function handleRegister() {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('password').value;
     const msgEl = document.getElementById('authMsg');
@@ -259,16 +274,10 @@
     }
   }
 
-  function enterApp(email) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-    document.getElementById('userEmail').innerText = email;
-    document.getElementById('avatarText').innerText = email.charAt(0).toUpperCase();
-    loadDashboard(); loadProducts(); loadAds(); loadSchedules(); loadCustomers(); loadSettings();
-  }
-
-  window.handleLogout = async function() {
-    if(!isDemoMode && supabase) await supabase.auth.signOut();
+  async function handleLogout() {
+    if(!isDemoMode && supabase) {
+      try { await supabase.auth.signOut(); } catch(e) {}
+    }
     document.getElementById('app').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('email').value = '';
@@ -283,27 +292,59 @@
     document.getElementById('statCustomers').innerText = db.customers.length;
     document.getElementById('waDash').href = `https://wa.me/${db.settings.wa}`;
   }
-  function loadProducts() { document.getElementById('productsList').innerHTML = '<p style="color:var(--text-muted);">Belum ada produk.</p>'; }
-  function loadAds() { document.getElementById('adsList').innerHTML = '<p style="color:var(--text-muted);">Belum ada materi iklan.</p>'; }
-  function loadSchedules() { document.getElementById('scheduleList').innerHTML = '<p style="color:var(--text-muted);">Belum ada jadwal.</p>'; }
-  function loadCustomers() { document.getElementById('customersList').innerHTML = '<p style="color:var(--text-muted);">Belum ada pelanggan.</p>'; }
-  function loadSettings() { document.getElementById('waNumber').value = db.settings.wa; document.getElementById('businessName').value = db.settings.name; document.getElementById('businessArea').value = db.settings.area; }
 
-  // --- ACTIONS ---
-  function addProduct() { closeModal('productModal'); loadProducts(); loadDashboard(); }
-  function addAd() { closeModal('adModal'); loadAds(); loadDashboard(); }
-  function addSchedule() { closeModal('scheduleModal'); loadSchedules(); loadDashboard(); }
-  function addCustomer() { closeModal('customerModal'); loadCustomers(); loadDashboard(); }
-  function saveSettings() { db.settings.wa = document.getElementById('waNumber').value; document.getElementById('settingsMsg').innerText = "Pengaturan berhasil disimpan!"; setTimeout(() => document.getElementById('settingsMsg').innerText = "", 3000); loadDashboard(); }
-  function generateAd() {
-    const p = document.getElementById('gProduct').value || "[Jenis Produk]";
-    const t = document.getElementById('gTarget').value || "[Target Pelanggan]";
-    const b = document.getElementById('gBenefit').value || "[Keunggulan]";
-    const pr = document.getElementById('gPromo').value || "[Harga/Promo]";
-    document.getElementById('generated').value = `Ada ${p} nih buat ${t}! 🏆🔥\n\nKenapa harus pilih kita?\n✅ ${b}\n✅ Harga bersahabat\n✅ Pengerjaan cepat & rapi\n\n💰 ${pr}\n\nLangsung chat admin sekarang! 📲\n\n#EcoSport #JerseyCustom`;
+  // --- MEMASANG EVENT KE TOMBOL (AMAN DARI SCOPE ISSUE) ---
+  function bindEvents() {
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
+
+    document.querySelectorAll('[data-action="page"]').forEach(btn => {
+      btn.addEventListener('click', () => showPage(btn.dataset.page));
+    });
+
+    document.querySelectorAll('[data-action="modal"]').forEach(btn => {
+      btn.addEventListener('click', () => openModal(btn.dataset.modal));
+    });
+
+    document.querySelectorAll('.close').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(btn.dataset.modal));
+    });
+
+    // Tombol Auth
+    if(document.getElementById('btnLogin')) document.getElementById('btnLogin').addEventListener('click', handleLogin);
+    if(document.getElementById('btnRegister')) document.getElementById('btnRegister').addEventListener('click', handleRegister);
+    if(document.getElementById('btnLogout')) document.getElementById('btnLogout').addEventListener('click', handleLogout);
+
+    // Tombol Aksi Lainnya
+    if(document.getElementById('btnAddProduct')) document.getElementById('btnAddProduct').addEventListener('click', () => { closeModal('productModal'); loadDashboard(); });
+    if(document.getElementById('btnAddAd')) document.getElementById('btnAddAd').addEventListener('click', () => { closeModal('adModal'); loadDashboard(); });
+    if(document.getElementById('btnAddSchedule')) document.getElementById('btnAddSchedule').addEventListener('click', () => { closeModal('scheduleModal'); loadDashboard(); });
+    if(document.getElementById('btnAddCustomer')) document.getElementById('btnAddCustomer').addEventListener('click', () => { closeModal('customerModal'); loadDashboard(); });
+    
+    if(document.getElementById('btnSaveSettings')) document.getElementById('btnSaveSettings').addEventListener('click', () => { 
+      db.settings.wa = document.getElementById('waNumber').value; 
+      document.getElementById('settingsMsg').innerText = "Pengaturan berhasil disimpan!"; 
+      setTimeout(() => document.getElementById('settingsMsg').innerText = "", 3000); 
+      loadDashboard(); 
+    });
+
+    if(document.getElementById('btnGenerate')) document.getElementById('btnGenerate').addEventListener('click', () => {
+      const p = document.getElementById('gProduct').value || "[Jenis Produk]";
+      const t = document.getElementById('gTarget').value || "[Target Pelanggan]";
+      const b = document.getElementById('gBenefit').value || "[Keunggulan]";
+      const pr = document.getElementById('gPromo').value || "[Harga/Promo]";
+      document.getElementById('generated').value = `Ada ${p} nih buat ${t}! 🏆🔥\n\nKenapa harus pilih kita?\n✅ ${b}\n✅ Harga bersahabat\n✅ Pengerjaan cepat & rapi\n\n💰 ${pr}\n\nLangsung chat admin sekarang! 📲\n\n#EcoSport #JerseyCustom`;
+    });
+
+    if(document.getElementById('btnCopy')) document.getElementById('btnCopy').addEventListener('click', () => { 
+      const text = document.getElementById('generated'); text.select(); document.execCommand('copy'); alert("Caption berhasil di-copy!"); 
+    });
+
+    if(document.getElementById('btnSaveGenerated')) document.getElementById('btnSaveGenerated').addEventListener('click', () => { 
+      loadDashboard(); alert("Materi iklan disimpan!"); 
+    });
   }
-  function copyGenerated() { const text = document.getElementById('generated'); text.select(); document.execCommand('copy'); alert("Caption berhasil di-copy!"); }
-  function saveGenerated() { loadAds(); loadDashboard(); alert("Materi iklan disimpan!"); }
 </script>
 </body>
 </html>
