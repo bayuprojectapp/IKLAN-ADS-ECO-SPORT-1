@@ -374,17 +374,17 @@
   <div class="login-card">
     <div class="logo">ECO <span>SPORT</span></div>
     <h1>Selamat Datang Kembali</h1>
-    <p>Masuk untuk mengelola iklan dan katalog jersey Anda.</p>
+    <p>Masuk atau daftar untuk mengelola iklan dan katalog jersey Anda.</p>
     <div class="form-group">
-      <input id="email" type="email" placeholder="Email Supabase">
+      <input id="email" type="email" placeholder="Masukkan Email">
     </div>
     <div class="form-group">
-      <input id="password" type="password" placeholder="Password">
+      <input id="password" type="password" placeholder="Masukkan Password (min 6 karakter)">
     </div>
     <button id="loginBtn" class="btn primary block">Masuk</button>
     <button id="registerBtn" class="btn ghost block">Daftar Akun Baru</button>
     <div id="authMsg" class="msg"></div>
-    <small>Isi konfigurasi Supabase di bagian script sebelum digunakan.</small>
+    <small>Pastikan sudah mengganti URL & Key Supabase di dalam kode.</small>
   </div>
 </div>
 
@@ -588,29 +588,27 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // --- KONFIGURASI SUPABASE ---
-  // GANTI DENGAN URL DAN KEY MILIK ANDA
+  // ==========================================
+  // KONFIGURASI SUPABASE (Wajib Diisi!)
+  // Ganti teks di dalam tanda kutip dengan URL & Key Anda
+  // ==========================================
   const SUPABASE_URL = "https://txcmtbavrxnwtueqfbvo.supabase.co"; 
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y210YmF2cnhud3R1ZXFmYnZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0OTc1NjksImV4cCI6MjEwNjA3MzU2OX0.xdWbr33kzKTgfcAnxJL5v_pdB5aQODmrLdBYSXnQZkI"; 
   
-  let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let supabase = null;
+  let isDemoMode = SUPABASE_URL.includes("your-project") || SUPABASE_KEY.includes("your-anon-key");
+
+  // Inisialisasi Supabase jika bukan mode demo
+  if(!isDemoMode) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
 
   // --- DUMMY DATA FALLBACK ---
-  // Data ini digunakan jika Supabase belum dikonfigurasi (untuk demo UI)
-  let isDemoMode = SUPABASE_URL.includes("your-project");
   let db = {
-    products: [
-      {id: 1, name: "Jersey Voli Premium", price: "85000", min_order: "10 pcs", image_url: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?w=500", description: "Bahan dryfit, custom nama & nomor."}
-    ],
-    ads: [
-      {id: 1, title: "Promo Akhir Tahun", platform: "Instagram", caption: "🔥 Dapatkan jersey impian tim Anda! 🔥 Discount 10% untuk pemesanan minimal 20 pcs. Buruan pesan sebelum kehabisan! 🏃‍♂️💨 . #EcoSport #JerseyCustom"}
-    ],
-    schedules: [
-      {id: 1, title: "Posting Produk Baru", platform: "Facebook", schedule_date: "2024-01-20T10:00", status: "Terjadwal"}
-    ],
-    customers: [
-      {id: 1, name: "Budi Santoso", phone: "08123456789", product: "Jersey Futsal", status: "Prospek", note: "Menunggu desain"}
-    ],
+    products: [],
+    ads: [],
+    schedules: [],
+    customers: [],
     settings: { wa: "6285768068165", name: "ECO SPORT", area: "OKU Timur" }
   };
 
@@ -648,17 +646,23 @@
     const pass = document.getElementById('password').value;
     const msgEl = document.getElementById('authMsg');
     msgEl.innerText = "";
-    
+    msgEl.style.color = "var(--danger)";
+
+    if(!email || !pass) {
+      msgEl.innerText = "Email dan password harus diisi.";
+      return;
+    }
+
     if(isDemoMode) {
-      msgEl.style.color = "var(--warning)";
-      msgEl.innerText = "Mode Demo: Mengisi Supabase URL/Key belum diatur. Masuk simulasi...";
-      setTimeout(() => enterApp("demo@ecosport.com"), 1000);
+      // Simulasi login demo
+      msgEl.style.color = "var(--success)";
+      msgEl.innerText = "Mode Demo aktif... Masuk aplikasi.";
+      setTimeout(() => enterApp(email), 1000);
       return;
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
     if (error) {
-      msgEl.style.color = "var(--danger)";
       msgEl.innerText = error.message;
     } else {
       enterApp(data.user.email);
@@ -670,33 +674,33 @@
     const pass = document.getElementById('password').value;
     const msgEl = document.getElementById('authMsg');
     msgEl.innerText = "";
-
-    if(isDemoMode) {
-      msgEl.style.color = "var(--danger)";
-      msgEl.innerText = "Mode Demo: Fitur daftar tidak aktif. Isi kredensial Supabase asli di kode.";
-      return;
-    }
+    msgEl.style.color = "var(--danger)";
 
     if(!email || !pass) {
-      msgEl.style.color = "var(--danger)";
       msgEl.innerText = "Email dan password harus diisi.";
       return;
     }
 
     if(pass.length < 6) {
-      msgEl.style.color = "var(--danger)";
       msgEl.innerText = "Password minimal harus 6 karakter.";
       return;
     }
 
+    if(isDemoMode) {
+      // Simulasi register demo
+      msgEl.style.color = "var(--success)";
+      msgEl.innerText = "Mode Demo: Akun dibuat simulasi. Silakan klik Masuk.";
+      return;
+    }
+
+    // Eksekusi Daftar Akun ke Supabase
     const { data, error } = await supabase.auth.signUp({ email, password: pass });
     
     if (error) {
-      msgEl.style.color = "var(--danger)";
       msgEl.innerText = error.message;
     } else {
       msgEl.style.color = "var(--success)";
-      msgEl.innerText = "Pendaftaran berhasil! Cek email Anda untuk verifikasi (jika diaktifkan), lalu silakan Login.";
+      msgEl.innerText = "Pendaftaran berhasil! Cek email Anda untuk verifikasi (jika diaktifkan di Supabase), lalu silakan Login.";
     }
   }
 
